@@ -1,10 +1,15 @@
 # Filings-RAG
 
-Ask questions over real SEC **10-K** HTML filings (local RAG + Chat Completions for answers).
+Local Q&A over real SEC **10-K** HTML filings. The long-term shape is RAG (chunk → embed → retrieve) with answers from a Chat Completions API. Right now the repo has the **local filing corpus** and a small **CLI skeleton**.
 
-## Local corpus (Step 1)
+## Requirements
 
-Company URLs live in [`companies/initial_company_list.txt`](companies/initial_company_list.txt). A one-shot script downloads them into `data/10k/` — after that, the app only reads local files (not a scraper product).
+- [uv](https://docs.astral.sh/uv/)
+- Python 3.12 (see `.python-version`)
+
+## Get the 10-K corpus
+
+Company names and primary 10-K URLs are listed in [`companies/initial_company_list.txt`](companies/initial_company_list.txt). Download once into `data/10k/` (the app only reads local files after that — not a scraper product):
 
 ```bash
 ./scripts/download_10k.sh
@@ -17,11 +22,9 @@ data/10k/{company_key}/{accession}/10k.htm
 data/10k/{company_key}/{accession}/meta.json
 ```
 
-See [`data/NOTICE`](data/NOTICE) for SEC/EDGAR notes. Tests and later ingest steps use this real HTML (no synthetic fixtures).
+See [`data/NOTICE`](data/NOTICE) for SEC/EDGAR notes. Tests use this real HTML (no synthetic fixtures).
 
-## Setup (Step 2)
-
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.12+.
+## Setup
 
 ```bash
 uv sync
@@ -30,17 +33,19 @@ uv run filings-rag status
 uv run pytest -q
 ```
 
-Prefer `uv.lock` as the install source of truth. Record exact pins when each step lands.
+`filings-rag status` reports whether the corpus is present and which company keys were found.
 
-### Stack versions
+## Stack versions
 
-| Component | Version | Introduced in step | Notes |
-| --- | --- | --- | --- |
-| Python | 3.12.13 | 2 | `.python-version` = `3.12`; verified via `uv run python --version` |
-| uv | 0.13.10 | 2 | Astral installer |
-| typer | 0.29.2 | 2 | CLI |
-| pytest | 9.2.0 | 2 | Dev dependency group |
+Prefer `uv.lock` as the install source of truth.
 
-### Why we chose (filled as later steps land)
+| Component | Version | Notes |
+| --- | --- | --- |
+| Python | 3.12.13 | `.python-version` = `3.12` |
+| uv | 0.13.10 | Astral installer |
+| typer | 0.29.2 | CLI |
+| pytest | 9.2.0 | Dev dependency group |
 
-**Embedding model / Qdrant / chat model** — documented in the design plan; pins land in Steps 6 and 8.
+## What’s next
+
+Ingest (parse/chunk), local embeddings + vector search, then grounded `ask` with citations.
