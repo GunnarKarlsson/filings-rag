@@ -1,0 +1,12 @@
+SEC EDGAR filings
+=================
+
+Filings under data/10k/ are retrieved from the U.S. Securities and Exchange
+Commission EDGAR system (https://www.sec.gov/). They are public company
+disclosures.
+
+Use of EDGAR data is subject to SEC terms and fair-access guidelines, including
+a descriptive User-Agent with contact information on automated requests. This
+project’s bootstrap script sends a descriptive User-Agent on those requests.
+
+This repository does not claim copyright over SEC-hosted filing content.
