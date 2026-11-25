@@ -1,0 +1,465 @@
+source_companies:
+- nvidia
+- apple
+- microsoft
+notes: 'Parsing rules for Form 10-K HTML. SEC item numbers are fixed (Regulation S-K):
+  Item 8 = Financial Statements and Supplementary Data; Item 15 = Exhibits and Financial
+  Statement Schedules. Primary statements (auditor report, income/operations, comprehensive
+  income, balance sheet, equity, cash flows, notes) satisfy Item 8. Item 15(a)(1)
+  is an index of those statements; supplemental schedules (e.g. Schedule II), when
+  present, belong to Item 15. Detect ITEM section starts with header_patterns on real
+  ITEM headings; ignore narrative cross-references (e.g. ''see Item 1A of this Form'').
+  Item 6 is [Reserved] and not required. For statement hotspots: match header_patterns
+  / compact_needles on statement titles—not on a fixed byte offset under an ITEM heading.
+  If a TOC or index entry for a statement is an href with a #fragment, resolve that
+  fragment and take the linked body (usually the HTML table); do not treat TOC page
+  numbers as the payload. content=tables means table-aware extraction; content=narrative
+  means prose. header_patterns include known title wordings (Operations vs Income,
+  Stockholders vs Shareholders). compact_needles match text when HTML splits words
+  across tags. source_companies lists filings used to harvest aliases_seen only.'
+sections:
+- id: item_1
+  item: '1'
+  title: Business
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+1\s*[.]?\s+Business
+  - (?i)\bITEM\s+1\b
+  compact_needles: []
+  aliases_seen:
+  - Item 1. Business
+  - Item 1. Note About Forward-Looking Statements
+- id: item_1a
+  item: 1A
+  title: Risk Factors
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+1A\s*[.]?\s+Risk\ Factors
+  - (?i)\bITEM\s+1A\b
+  compact_needles: []
+  aliases_seen:
+  - Item 1A. Risk factors” in this annual report on Form 10-K for additional information
+    about cybersecurity-related risks
+  - Item 1A. Risk Factors
+  - Item 1A. Abuse of our platforms may harm our reputation or user engagement
+- id: item_1b
+  item: 1B
+  title: Unresolved Staff Comments
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+1B\s*[.]?\s+Unresolved\ Staff\ Comments
+  - (?i)\bITEM\s+1B\b
+  compact_needles: []
+  aliases_seen:
+  - Item 1B. Unresolved Staff Comments
+- id: item_1c
+  item: 1C
+  title: Cybersecurity
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+1C\s*[.]?\s+Cybersecurity
+  - (?i)\bITEM\s+1C\b
+  compact_needles: []
+  aliases_seen:
+  - Item 1C. Cybersecurity
+- id: item_2
+  item: '2'
+  title: Properties
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+2\s*[.]?\s+Properties
+  - (?i)\bITEM\s+2\b
+  compact_needles: []
+  aliases_seen:
+  - Item 2. Properties
+- id: item_3
+  item: '3'
+  title: Legal Proceedings
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+3\s*[.]?\s+Legal\ Proceedings
+  - (?i)\bITEM\s+3\b
+  compact_needles: []
+  aliases_seen:
+  - Item 3. Legal Proceedings
+- id: item_4
+  item: '4'
+  title: Mine Safety Disclosures
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+4\s*[.]?\s+Mine\ Safety\ Disclosures
+  - (?i)\bITEM\s+4\b
+  compact_needles: []
+  aliases_seen:
+  - Item 4. Mine Safety Disclosures
+- id: item_5
+  item: '5'
+  title: Market for Registrant's Common Equity, Related Stockholder Matters and Issuer
+    Purchases of Equity Securities
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+5\s*[.]?\s+Market\ for\ Registrant's\ Common
+  - (?i)\bITEM\s+5\b
+  compact_needles: []
+  aliases_seen:
+  - Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and
+    Issuer Purchases of Equity Securities
+  - Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters, and
+    Issuer Purchases of Equity Securities
+- id: item_6
+  item: '6'
+  title: '[Reserved]'
+  required: false
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+6\s*[.]?\s+Reserved
+  - (?i)\bITEM\s+6\b
+  compact_needles: []
+  aliases_seen:
+  - Item 6. [Reserved]
+- id: item_7
+  item: '7'
+  title: Management's Discussion and Analysis of Financial Condition and Results of
+    Operations
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+7\s*[.]?\s+Management's\ Discussion\ and\ Analysis
+  - (?i)\bITEM\s+7\b
+  compact_needles: []
+  aliases_seen:
+  - Item 7. Management’s Discussion and Analysis of Financial Condition and Results
+    of Operations
+  - Item 7. of the Company’s Annual Report on Form 10-K for the fiscal year ended
+    September 27, 2025
+- id: item_7a
+  item: 7A
+  title: Quantitative and Qualitative Disclosures About Market Risk
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+7A\s*[.]?\s+Quantitative\ and\ Qualitative\ Disclosures
+  - (?i)\bITEM\s+7A\b
+  compact_needles: []
+  aliases_seen:
+  - Item 7A. Quantitative and Qualitative Disclosures About Market Risk
+- id: item_8
+  item: '8'
+  title: Financial Statements and Supplementary Data
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+8\s*[.]?\s+Financial\ Statements\ and\ Supplementary
+  - (?i)\bITEM\s+8\b
+  compact_needles: []
+  aliases_seen:
+  - Item 8. Financial Statements and Supplementary Data
+  - Item 8. The following table outlines maturities of our long-term debt, including
+    the current portion, as of June 30, 2026
+- id: fs_auditor_report
+  item: '8'
+  title: Report of Independent Registered Public Accounting Firm
+  required: true
+  parent: item_8
+  content: narrative
+  header_patterns:
+  - (?i)Report of Independent Registered Public Accounting Firm
+  compact_needles:
+  - reportofindependentregisteredpublicaccountingfirm
+  aliases_seen:
+  - Report of Independent Registered Public Accounting Firm
+- id: fs_income
+  item: '8'
+  title: Consolidated Statements of Income
+  required: true
+  parent: item_8
+  content: tables
+  header_patterns:
+  - (?i)Consolidated Statements? of Income\b
+  - (?i)Consolidated Statements? of Operations\b
+  - (?i)\bINCOME STATEMENTS?\b
+  compact_needles:
+  - consolidatedstatementsofincome
+  - consolidatedstatementsofoperations
+  - incomestatements
+  aliases_seen:
+  - Consolidated Statements of Income
+  - consolidated statements of income
+  - income statement
+  - Consolidated Statements of Operations
+  - CONSOLIDATED STATEMENTS OF OPERATIONS
+  - consolidated statements of operations
+  - Income Statement
+  - income statements
+- id: fs_comprehensive_income
+  item: '8'
+  title: Consolidated Statements of Comprehensive Income
+  required: true
+  parent: item_8
+  content: tables
+  header_patterns:
+  - (?i)Consolidated Statements? of Comprehensive Income\b
+  - (?i)\bCOMPREHENSIVE INCOME STATEMENTS?\b
+  compact_needles:
+  - consolidatedstatementsofcomprehensiveincome
+  - comprehensiveincomestatements
+  aliases_seen:
+  - Consolidated Statements of Comprehensive Income
+  - CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME
+  - comprehensive income statements
+  - Comprehensive Income Statements
+- id: fs_balance_sheet
+  item: '8'
+  title: Consolidated Balance Sheets
+  required: true
+  parent: item_8
+  content: tables
+  header_patterns:
+  - (?i)Consolidated Balance Sheets?\b
+  - (?i)\bBALANCE SHEETS?\b
+  compact_needles:
+  - consolidatedbalancesheets
+  - consolidatedbalancesheet
+  - balancesheets
+  aliases_seen:
+  - Consolidated Balance Sheets
+  - consolidated balance sheets
+  - consolidated balance sheet
+  - Consolidated Balance Sheet
+  - CONSOLIDATED BALANCE SHEETS
+  - Balance Sheets
+  - balance sheet
+  - balance sheets
+- id: fs_equity
+  item: '8'
+  title: Consolidated Statements of Shareholders' Equity
+  required: true
+  parent: item_8
+  content: tables
+  header_patterns:
+  - (?i)Consolidated Statements? of Shareholders['’]? Equity\b
+  - (?i)Consolidated Statements? of Stockholders['’]? Equity\b
+  - (?i)Statements? of Stockholders['’]? Equity\b
+  compact_needles:
+  - consolidatedstatementsofshareholdersequity
+  - consolidatedstatementsofstockholdersequity
+  - statementsofstockholdersequity
+  - stockholdersequitystatements
+  - shareholdersequitystatements
+  aliases_seen:
+  - Consolidated Statements of Shareholders’ Equity
+  - Consolidated Statements of Shareholders' Equity
+  - CONSOLIDATED STATEMENTS OF SHAREHOLDERS’ EQUITY
+- id: fs_cash_flows
+  item: '8'
+  title: Consolidated Statements of Cash Flows
+  required: true
+  parent: item_8
+  content: tables
+  header_patterns:
+  - (?i)Consolidated Statements? of Cash Flows?\b
+  - (?i)\bCASH FLOWS? STATEMENTS?\b
+  - (?i)Statements? of Cash Flows?\b
+  compact_needles:
+  - consolidatedstatementsofcashflows
+  - cashflowsstatements
+  - statementsofcashflows
+  aliases_seen:
+  - Consolidated Statements of Cash Flows
+  - consolidated statement of cash flows
+  - Statements of Cash Flows
+  - statement of cash flows
+  - CONSOLIDATED STATEMENTS OF CASH FLOWS
+  - STATEMENTS OF CASH FLOWS
+  - cash flows statements
+  - Cash Flows Statements
+- id: fs_notes
+  item: '8'
+  title: Notes to the Consolidated Financial Statements
+  required: true
+  parent: item_8
+  content: tables
+  header_patterns:
+  - (?i)Notes to the Consolidated Financial Statements\b
+  - (?i)Notes to Consolidated Financial Statements\b
+  - (?i)Notes to Financial Statements\b
+  compact_needles:
+  - notestotheconsolidatedfinancialstatements
+  - notestoconsolidatedfinancialstatements
+  - notestofinancialstatements
+  aliases_seen:
+  - Notes to the Consolidated Financial Statements
+  - Notes to Consolidated Financial Statements
+  - Notes to Financial Statements
+- id: item_9
+  item: '9'
+  title: Changes in and Disagreements with Accountants on Accounting and Financial
+    Disclosure
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+9\s*[.]?\s+Changes\ in\ and\ Disagreements
+  - (?i)\bITEM\s+9\b
+  compact_needles: []
+  aliases_seen:
+  - Item 9. Changes in and Disagreements with Accountants on Accounting and Financial
+    Disclosure
+- id: item_9a
+  item: 9A
+  title: Controls and Procedures
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+9A\s*[.]?\s+Controls\ and\ Procedures
+  - (?i)\bITEM\s+9A\b
+  compact_needles: []
+  aliases_seen:
+  - Item 9A. Controls and Procedures
+- id: item_9b
+  item: 9B
+  title: Other Information
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+9B\s*[.]?\s+Other\ Information
+  - (?i)\bITEM\s+9B\b
+  compact_needles: []
+  aliases_seen:
+  - Item 9B. Other Information
+- id: item_9c
+  item: 9C
+  title: Disclosure Regarding Foreign Jurisdictions that Prevent Inspections
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+9C\s*[.]?\s+Disclosure\ Regarding\ Foreign\ Jurisdictions
+  - (?i)\bITEM\s+9C\b
+  compact_needles: []
+  aliases_seen:
+  - Item 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspections
+- id: item_10
+  item: '10'
+  title: Directors, Executive Officers and Corporate Governance
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+10\s*[.]?\s+Directors,\ Executive\ Officers\ and
+  - (?i)\bITEM\s+10\b
+  compact_needles: []
+  aliases_seen:
+  - Item 10. Directors, Executive Officers and Corporate Governance
+  - Item 10. Directors, Executive Officers, and Corporate Governance
+- id: item_11
+  item: '11'
+  title: Executive Compensation
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+11\s*[.]?\s+Executive\ Compensation
+  - (?i)\bITEM\s+11\b
+  compact_needles: []
+  aliases_seen:
+  - Item 11. Executive Compensation
+- id: item_12
+  item: '12'
+  title: Security Ownership of Certain Beneficial Owners and Management and Related
+    Stockholder Matters
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+12\s*[.]?\s+Security\ Ownership\ of\ Certain
+  - (?i)\bITEM\s+12\b
+  compact_needles: []
+  aliases_seen:
+  - Item 12. Security Ownership of Certain Beneficial Owners and Management and Related
+    Stockholder Matters
+- id: item_13
+  item: '13'
+  title: Certain Relationships and Related Transactions, and Director Independence
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+13\s*[.]?\s+Certain\ Relationships\ and\ Related
+  - (?i)\bITEM\s+13\b
+  compact_needles: []
+  aliases_seen:
+  - Item 13. Certain Relationships and Related Transactions, and Director Independence
+- id: item_14
+  item: '14'
+  title: Principal Accountant Fees and Services
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+14\s*[.]?\s+Principal\ Accountant\ Fees\ and
+  - (?i)\bITEM\s+14\b
+  compact_needles: []
+  aliases_seen:
+  - Item 14. Principal Accountant Fees and Services
+- id: item_15
+  item: '15'
+  title: Exhibits and Financial Statement Schedules
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+15\s*[.]?\s+Exhibits\ and\ Financial\ Statement
+  - (?i)\bITEM\s+15\b
+  compact_needles: []
+  aliases_seen:
+  - Item 15. Exhibits and Financial Statement Schedules
+  - Item 15. Exhibit and Financial Statement Schedules
+- id: fs_schedule_ii
+  item: '15'
+  title: Schedule II Valuation and Qualifying Accounts
+  required: false
+  parent: item_15
+  content: tables
+  header_patterns:
+  - (?i)Schedule II\b.{0,40}Valuation and Qualifying Accounts
+  - (?i)Schedule II Valuation and Qualifying Accounts
+  compact_needles:
+  - scheduleiivaluationandqualifyingaccounts
+  aliases_seen:
+  - Schedule II Valuation and Qualifying Accounts
+  - Schedule II – Valuation and Qualifying Accounts
+- id: item_16
+  item: '16'
+  title: Form 10-K Summary
+  required: true
+  parent: null
+  content: null
+  header_patterns:
+  - (?i)\bITEM\s+16\s*[.]?\s+Form\ 10\-K\ Summary
+  - (?i)\bITEM\s+16\b
+  compact_needles: []
+  aliases_seen:
+  - Item 16. Form 10-K Summary
