@@ -6,7 +6,9 @@ import typer
 
 from filings_rag import __version__
 from filings_rag.blueprint import build_blueprint, coverage_report, save_blueprint
+from filings_rag.blueprint.io import load_blueprint
 from filings_rag.config import BLUEPRINT_PATH, FILINGS_10K_DIR, PROJECT_ROOT
+from filings_rag.parse import format_rows, list_filing_paths, parse_filing
 
 app = typer.Typer(
     name="filings-rag",
@@ -79,6 +81,63 @@ def blueprint(
 
     if missing_any:
         raise typer.Exit(code=1)
+
+
+@app.command("parse")
+def parse_cmd(
+    company: str | None = typer.Option(
+        None,
+        "--company",
+        help="Company key under data/10k/ (default: every local filing).",
+    ),
+    section: str = typer.Option(
+        "fs_income",
+        "--section",
+        help="Which cut-out to show, by checklist id (fs_income, fs_balance_sheet, item_1a, …).",
+    ),
+    rows: int = typer.Option(
+        10,
+        "--rows",
+        help="For statement tables, how many rows to print.",
+    ),
+    blueprint_path: Path = typer.Option(
+        BLUEPRINT_PATH,
+        "--blueprint",
+        help="Checklist YAML (default: data/blueprint/10k_sections.yaml).",
+    ),
+) -> None:
+    """Cut sections out of local 10-K HTML using the blueprint checklist; print one of them."""
+    if not blueprint_path.is_file():
+        typer.echo(f"Missing blueprint: {blueprint_path}", err=True)
+        raise typer.Exit(code=1)
+
+    blueprint = load_blueprint(blueprint_path)
+    paths = list_filing_paths(FILINGS_10K_DIR)
+    if company:
+        paths = [p for p in paths if p.parts[-3] == company]
+        if not paths:
+            typer.echo(f"No filing for company key {company!r}", err=True)
+            raise typer.Exit(code=1)
+
+    if not paths:
+        typer.echo("No local 10-K HTML under data/10k/", err=True)
+        raise typer.Exit(code=1)
+
+    for path in paths:
+        parsed = parse_filing(path, blueprint)
+        typer.echo(f"\n{parsed.company_key}  sections={len(parsed.sections)}  {path}")
+        extracted = parsed.get(section)
+        if extracted is None:
+            typer.echo(f"  missing section {section!r}", err=True)
+            raise typer.Exit(code=1)
+        table = extracted.primary_table()
+        if table is not None:
+            typer.echo(f"  {section}: {len(table.rows)} table rows (showing {rows})")
+            typer.echo(format_rows(table.preview_rows(rows)))
+        else:
+            preview = extracted.text[:1_200].replace("\n", " ")
+            typer.echo(f"  {section}: {len(extracted.text)} chars")
+            typer.echo(f"  {preview}…")
 
 
 def main() -> None:
