@@ -1,1 +1,10 @@
 _dev-doc/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.env
+*.egg-info/
+dist/
+build/

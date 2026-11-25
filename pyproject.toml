@@ -1,0 +1,27 @@
+[project]
+name = "filings-rag"
+version = "0.1.0"
+description = "Local RAG over SEC 10-K HTML filings with Chat Completions answers"
+authors = [
+    { name = "Gunnar Karlsson", email = "gunnar.h.karlsson@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.20.0",
+]
+
+[project.scripts]
+filings-rag = "filings_rag.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.13.10,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
