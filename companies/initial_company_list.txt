@@ -1,0 +1,21 @@
+# nvidia:
+https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm
+
+# apple:
+https://www.sec.gov/Archives/edgar/data/320193/000032019326000026/aapl-20260926.htm
+
+# google/alphabet:
+https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm
+
+# meta:
+https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm
+
+# oracle:
+https://www.sec.gov/Archives/edgar/data/1341439/000119312526277521/orcl-20260531.htm
+
+# microsoft:
+https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm
+
+# amazon;
+https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm
+
