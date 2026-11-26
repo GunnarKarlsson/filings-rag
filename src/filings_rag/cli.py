@@ -7,8 +7,15 @@ import typer
 from filings_rag import __version__
 from filings_rag.blueprint import build_blueprint, coverage_report, save_blueprint
 from filings_rag.blueprint.io import load_blueprint
-from filings_rag.config import BLUEPRINT_PATH, FILINGS_10K_DIR, PROJECT_ROOT
+from filings_rag.config import (
+    BLUEPRINT_PATH,
+    CATALOG_PATH,
+    FILINGS_10K_DIR,
+    PROJECT_ROOT,
+)
+from filings_rag.ingest import ingest_filings
 from filings_rag.parse import format_rows, list_filing_paths, parse_filing
+from filings_rag.store import Catalog, clear_catalog
 
 app = typer.Typer(
     name="filings-rag",
@@ -24,7 +31,7 @@ def _root() -> None:
 
 @app.command()
 def status() -> None:
-    """Show package version and whether the local 10-K corpus is present."""
+    """Show package version, local 10-K corpus, and SQLite catalog counts."""
     filings = (
         sorted(FILINGS_10K_DIR.glob("*/*/10k.htm")) if FILINGS_10K_DIR.is_dir() else []
     )
@@ -32,6 +39,7 @@ def status() -> None:
     typer.echo(f"filings-rag {__version__}")
     typer.echo(f"project_root: {PROJECT_ROOT}")
     typer.echo(f"filings_dir:  {FILINGS_10K_DIR}")
+    typer.echo(f"catalog:      {CATALOG_PATH}")
     if not filings:
         typer.echo("10-K corpus:  missing (run ./scripts/download_10k.sh)")
         raise typer.Exit(code=1)
@@ -39,6 +47,20 @@ def status() -> None:
     companies = sorted({Path(p).parts[-3] for p in filings})
     typer.echo(f"10-K corpus:  {len(filings)} filing(s), {len(companies)} company key(s)")
     typer.echo(f"companies:    {', '.join(companies)}")
+
+    if CATALOG_PATH.is_file():
+        with Catalog(CATALOG_PATH) as catalog:
+            stats = catalog.stats()
+        typer.echo(
+            f"catalog DB:   {stats.filings} filing(s), {stats.chunks} chunk(s), "
+            f"{stats.companies} company key(s)"
+        )
+        if stats.last_run_at:
+            typer.echo(
+                f"last ingest:  mode={stats.last_run_mode} at {stats.last_run_at}"
+            )
+    else:
+        typer.echo("catalog DB:   missing (run: filings-rag ingest --skip-embed)")
 
 
 @app.command()
@@ -138,6 +160,72 @@ def parse_cmd(
             preview = extracted.text[:1_200].replace("\n", " ")
             typer.echo(f"  {section}: {len(extracted.text)} chars")
             typer.echo(f"  {preview}…")
+
+
+@app.command()
+def ingest(
+    skip_embed: bool = typer.Option(
+        False,
+        "--skip-embed",
+        help="Parse and chunk into SQLite only (required until embeddings land).",
+    ),
+    company: str | None = typer.Option(
+        None,
+        "--company",
+        help="Only ingest this company key (default: every local filing).",
+    ),
+    catalog: Path = typer.Option(
+        CATALOG_PATH,
+        "--catalog",
+        help="SQLite catalog path.",
+    ),
+    blueprint_path: Path = typer.Option(
+        BLUEPRINT_PATH,
+        "--blueprint",
+        help="Checklist YAML used to parse sections before chunking.",
+    ),
+) -> None:
+    """Parse local 10-Ks, split into chunks, and write the SQLite catalog."""
+    if not skip_embed:
+        typer.echo(
+            "Embeddings are not wired yet. Re-run with --skip-embed "
+            "(parse → chunk → SQLite only).",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+    try:
+        result = ingest_filings(
+            blueprint_path=blueprint_path,
+            catalog_path=catalog,
+            company=company,
+            skip_embed=True,
+        )
+    except (FileNotFoundError, ValueError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(
+        f"ingest ok  mode={result.mode}  filings={result.filing_count}  "
+        f"chunks={result.chunk_count}"
+    )
+    typer.echo(f"catalog: {result.catalog_path}")
+
+
+@app.command("clear-db")
+def clear_db(
+    catalog: Path = typer.Option(
+        CATALOG_PATH,
+        "--catalog",
+        help="SQLite catalog path to delete.",
+    ),
+) -> None:
+    """Delete the SQLite catalog so the next ingest starts empty. Leaves data/10k/ alone."""
+    removed = clear_catalog(catalog)
+    if not removed:
+        typer.echo(f"nothing to clear ({catalog} not present)")
+        return
+    for path in removed:
+        typer.echo(f"removed {path}")
 
 
 def main() -> None:

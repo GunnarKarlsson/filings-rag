@@ -1,6 +1,6 @@
 # Filings-RAG
 
-Local Q&A over real SEC **10-K** HTML filings. The long-term shape is RAG (chunk → embed → retrieve) with answers from a Chat Completions API. Right now the repo has the **local filing corpus**, a **section blueprint**, an HTML **section parser**, and a small **CLI**.
+Local Q&A over real SEC **10-K** HTML filings. The long-term shape is RAG (chunk → embed → retrieve) with answers from a Chat Completions API. Right now the repo can download the corpus, build a section checklist, cut sections out of the HTML, split them into chunks, and store those chunks in a local SQLite catalog.
 
 ## Requirements
 
@@ -33,7 +33,7 @@ uv run filings-rag status
 uv run pytest -q
 ```
 
-`filings-rag status` reports whether the corpus is present and which company keys were found.
+`filings-rag status` reports the corpus and, after ingest, how many filings/chunks are in the SQLite catalog.
 
 ## Section blueprint
 
@@ -69,6 +69,34 @@ Tests run this over **every** filing under `data/10k/` and print the first 10 ro
 uv run pytest -s tests/unit/test_parse.py
 ```
 
+## Chunk and catalog (ingest without embeddings)
+
+Pipeline for each local `10k.htm`:
+
+1. **Parse** — cut the HTML into **sections** using the blueprint checklist (Item 1, Item 7, income statement, …). Each section is plain text; statement sections are the table turned into readable rows.
+2. **Chunk** — split **each section** into one or more overlapping text **chunks** (~2400 characters, ~300 overlap). A short section (for example the income statement table) is often a single chunk; a long one (Risk Factors) becomes many. Every chunk keeps the section id it came from, plus company, accession, offsets, and a content hash.
+3. **Catalog** — store those chunks in SQLite. We do **not** chunk the whole HTML as one blob.
+
+`ingest --skip-embed` runs that pipeline for every local 10-K and writes [`data/indexes/catalog.sqlite`](data/indexes/) (re-running replaces chunks for the same filing — safe to repeat):
+
+```bash
+uv run filings-rag ingest --skip-embed
+uv run filings-rag status
+```
+
+Wipe the catalog (not the downloaded 10-Ks) and ingest again from scratch:
+
+```bash
+uv run filings-rag clear-db
+uv run filings-rag ingest --skip-embed
+```
+
+Embeddings into Qdrant come in a later step; without `--skip-embed` the command exits and tells you to pass that flag.
+
+```bash
+uv run pytest tests/unit/test_chunk.py tests/unit/test_catalog.py -q
+```
+
 ## Stack versions
 
 Prefer `uv.lock` as the install source of truth.
@@ -80,8 +108,9 @@ Prefer `uv.lock` as the install source of truth.
 | typer | 0.29.2 | CLI |
 | beautifulsoup4 | 4.15.0 | HTML → text for header detection |
 | PyYAML | 6.0.4 | Blueprint file |
+| SQLite | stdlib | Chunk catalog at `data/indexes/catalog.sqlite` |
 | pytest | 9.2.0 | Dev dependency group |
 
 ## What’s next
 
-Chunk/embed/retrieve parsed sections and grounded `ask` with citations.
+Local embeddings + Qdrant, then retrieve and grounded `ask` with citations.
